@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>شجره‌نامه | Family Tree</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">🌳</div><div><b>شجره‌نامه</b><small>Family Tree</small></div></div>
+    <button class="nav active" data-view="tree">🌳 <span>درخت خانواده</span></button>
+    <button class="nav" data-view="people">👥 <span>افراد</span></button>
+    <button class="nav" data-view="timeline">🕰️ <span>خط زمانی</span></button>
+    <button class="nav" data-view="reports">📊 <span>گزارش و آمار</span></button>
+    <button class="nav" data-view="media">📷 <span>عکس و اسناد</span></button>
+    <button class="nav" data-view="settings">⚙️ <span>تنظیمات</span></button>
+    <div class="sidebar-bottom"><span id="saveState">ذخیره خودکار فعال</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="familyTitle">خانواده آزادگان</h1>
+        <p id="familySubtitle">مدیریت و نگهداری تاریخ خانواده</p>
+      </div>
+      <div class="actions">
+        <input id="search" type="search" placeholder="جستجوی نام..." aria-label="جستجو">
+        <button class="btn ghost" id="cloudBtn">☁️ اتصال Cloud</button>
+        <button class="btn ghost" id="exportJson">پشتیبان JSON</button>
+        <button class="btn primary" id="addPerson">＋ افزودن فرد</button>
+      </div>
+    </header>
+
+    <section id="view-tree" class="view active">
+      <div class="toolbar">
+        <button class="btn ghost" id="zoomIn">＋</button>
+        <button class="btn ghost" id="zoomOut">−</button>
+        <button class="btn ghost" id="resetZoom">بازنشانی</button>
+        <button class="btn ghost" id="expandAll">نمایش همه</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="exportHtml">خروجی HTML</button>
+        <button class="btn ghost" id="exportSvg">خروجی SVG</button>
+        <button class="btn primary" id="exportPrint">چاپ / PDF</button>
+      </div>
+      <div class="tree-wrap" id="treeWrap">
+        <div id="treeCanvas" class="tree-canvas"></div>
+      </div>
+    </section>
+
+    <section id="view-people" class="view">
+      <div class="section-head"><h2>افراد خانواده</h2><button class="btn primary" id="addPerson2">＋ افزودن فرد</button></div>
+      <div id="peopleGrid" class="people-grid"></div>
+    </section>
+
+    <section id="view-timeline" class="view">
+      <div class="section-head"><h2>خط زمانی</h2></div>
+      <div id="timeline" class="timeline"></div>
+    </section>
+
+    <section id="view-reports" class="view">
+      <div class="section-head"><h2>گزارش و آمار</h2></div>
+      <div id="stats" class="stats"></div>
+    </section>
+
+    <section id="view-media" class="view">
+      <div class="section-head"><h2>عکس و اسناد</h2><button class="btn primary" id="addMedia">＋ افزودن فایل</button></div>
+      <div class="media-note">فایل‌ها فعلاً در مرورگر نگهداری می‌شوند. در نسخه Cloud می‌توان آن‌ها را روی فضای ابری ذخیره و با خانواده به اشتراک گذاشت.</div>
+      <div id="mediaGrid" class="media-grid"></div>
+    </section>
+
+    <section id="view-settings" class="view">
+      <div class="section-head"><h2>تنظیمات و Cloud</h2></div>
+      <div class="settings-card">
+        <label>نام خانواده<input id="familyName" type="text"></label>
+        <label>فونت
+          <select id="fontSelect"><option value="Vazirmatn, Tahoma, sans-serif">وزیر / Tahoma</option><option value="Tahoma, sans-serif">Tahoma</option><option value="Arial, sans-serif">Arial</option><option value="Georgia, serif">Georgia</option></select>
+        </label>
+        <label>رنگ اصلی<input id="accent" type="color" value="#4f46e5"></label>
+        <button class="btn primary" id="saveSettings">ذخیره تنظیمات</button>
+        <hr>
+        <h3>حساب و همگام‌سازی</h3>
+        <p id="cloudStatus">حالت محلی فعال است.</p>
+        <button class="btn primary" id="googleLogin">ورود با Google</button>
+        <button class="btn ghost" id="shareProject">ساخت لینک اشتراک</button>
+        <button class="btn ghost" id="exportGedcom">خروجی GEDCOM</button>
+        <button class="btn ghost" id="importJson">ورود پشتیبان JSON</button>
+        <input id="jsonFile" type="file" accept=".json" hidden>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal hidden">
+ <div class="modal-card">
+  <div class="modal-head"><h3 id="modalTitle">افزودن فرد</h3><button id="closeModal">×</button></div>
+  <form id="personForm">
+   <input type="hidden" id="personId">
+   <label>نام و نام خانوادگی *<input id="personName" required></label>
+   <div class="two"><label>جنسیت<select id="gender"><option value="male">مرد</option><option value="female">زن</option></select></label><label>سال تولد<input id="birth" placeholder="مثلاً ۱۳۲۰"></label></div>
+   <div class="two"><label>سال فوت<input id="death" placeholder="در صورت وجود"></label><label>محل تولد<input id="birthPlace"></label></div>
+   <label>پدر<select id="father"><option value="">— بدون انتخاب —</option></select></label>
+   <label>مادر<select id="mother"><option value="">— بدون انتخاب —</option></select></label>
+   <label>همسر<select id="spouse"><option value="">— بدون انتخاب —</option></select></label>
+   <label>توضیحات<textarea id="notes" rows="4"></textarea></label>
+   <div class="form-actions"><button type="button" class="btn danger" id="deletePerson">حذف</button><span class="spacer"></span><button type="button" class="btn ghost" id="cancel">انصراف</button><button class="btn primary">ذخیره</button></div>
+  </form>
+ </div>
+</div>
+<script src="app.js"></script>
+<input id="mediaFile" type="file" accept="image/*,.pdf,.txt,.doc,.docx" hidden>
+</body>
+</html>
