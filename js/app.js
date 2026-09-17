@@ -41,7 +41,12 @@ class ShajarehApp {
 
       const projects = await db.getProjects();
       if (projects.length === 0) {
-        this.openModal('modal-project');
+        // Load rich sample family on first run
+        if (window.SAMPLE_FAMILY) {
+          await this._loadSampleFamily();
+        } else {
+          this.openModal('modal-project');
+        }
       } else {
         await this.loadProject(projects[0].id);
       }
@@ -107,6 +112,20 @@ class ShajarehApp {
     this._refreshAll();
     await this._loadProjects();
     setTimeout(() => this.renderer.fit(), 150);
+  }
+
+  async _loadSampleFamily() {
+    const sample = window.SAMPLE_FAMILY;
+    if (!sample) return;
+    await db.saveProject(sample.project);
+    for (const p of sample.people) {
+      await db.savePerson(p);
+    }
+    for (const r of sample.relationships) {
+      await db.saveRelationship(r);
+    }
+    await this.loadProject(sample.project.id);
+    this.toast('شجره‌نامه نمونه «خانواده آزادگان» بارگذاری شد — می‌توانید ویرایش کنید یا پروژه جدید بسازید', 'success');
   }
 
   async createProject() {

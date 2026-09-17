@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d6a4f"/>
+      <stop offset="100%" style="stop-color:#1b4332"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Trunk -->
+  <rect x="236" y="300" width="40" height="120" rx="8" fill="#d8f3dc"/>
+  <!-- Canopy layers -->
+  <circle cx="256" cy="220" r="110" fill="#95d5b2"/>
+  <circle cx="190" cy="250" r="75" fill="#40916c"/>
+  <circle cx="322" cy="250" r="75" fill="#40916c"/>
+  <circle cx="256" cy="180" r="80" fill="#d8f3dc"/>
+  <!-- People representing family -->
+  <circle cx="180" cy="400" r="22" fill="#ffffff" opacity="0.95"/>
+  <circle cx="256" cy="420" r="22" fill="#ffffff" opacity="0.95"/>
+  <circle cx="332" cy="400" r="22" fill="#ffffff" opacity="0.95"/>
+  <!-- Connection lines subtle -->
+  <path d="M180 400 L256 300 L332 400" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.3"/>
+</svg>
