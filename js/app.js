@@ -24,8 +24,9 @@ class ShajarehApp {
       await db.init();
 
       this.renderer = new TreeRenderer(document.getElementById('tree-wrapper'));
-      this.renderer.onPersonClick = (p) => this.openInspector(p);
+      this.renderer.onPersonClick = (p) => this.onPersonSelected(p);
       this.renderer.onPersonContext = (p, x, y) => this.showContextMenu(p, x, y);
+      this.renderer.onEmptyStart = () => this.startWithMe();
 
       this.exporter = new ExportEngine(this);
       this.stats = new StatsEngine(this);
@@ -41,12 +42,8 @@ class ShajarehApp {
 
       const projects = await db.getProjects();
       if (projects.length === 0) {
-        // Load rich sample family on first run
-        if (window.SAMPLE_FAMILY) {
-          await this._loadSampleFamily();
-        } else {
-          this.openModal('modal-project');
-        }
+        // Empty start — show "شروع با من" (no fake data)
+        this.showWelcome();
       } else {
         await this.loadProject(projects[0].id);
       }
@@ -114,18 +111,212 @@ class ShajarehApp {
     setTimeout(() => this.renderer.fit(), 150);
   }
 
+  /** First-run welcome: no fake data */
+  showWelcome() {
+    const overlay = document.getElementById('tree-overlay');
+    if (!overlay) return;
+    overlay.innerHTML = `
+      <div class="welcome-screen" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px;z-index:5">
+        <div style="font-size:4.5rem;line-height:1">🌳</div>
+        <h2 style="font-size:1.6rem;font-weight:700;color:var(--color-primary-dark);margin:0">شجره‌نامه خودت را بساز</h2>
+        <p style="max-width:360px;color:var(--color-text-muted);line-height:1.7;margin:0">
+          از خودت شروع کن. بعد با یک کلیک پدر، مادر، همسر، خواهر، برادر یا فرزند اضافه کن.
+        </p>
+        <button id="btn-start-with-me" class="btn btn-primary" style="height:48px;padding:0 28px;font-size:1rem">
+          شروع با من
+        </button>
+        <button id="btn-load-sample-optional" class="btn btn-ghost" style="font-size:0.85rem;color:var(--color-text-muted)">
+          یا بارگذاری شجره‌نامه نمونه (اختیاری)
+        </button>
+      </div>
+    `;
+    document.getElementById('btn-start-with-me').onclick = () => this.startWithMe();
+    document.getElementById('btn-load-sample-optional').onclick = () => this._askLoadSample();
+  }
+
+  async _askLoadSample() {
+    if (!window.SAMPLE_FAMILY) {
+      this.toast('فایل نمونه موجود نیست', 'error');
+      return;
+    }
+    if (!confirm('شجره‌نامه نمونه «خانواده آزادگان» بارگذاری شود؟\n(بعداً می‌توانی پاک کنی و از صفر شروع کنی)')) return;
+    await this._loadSampleFamily();
+  }
+
   async _loadSampleFamily() {
     const sample = window.SAMPLE_FAMILY;
     if (!sample) return;
     await db.saveProject(sample.project);
-    for (const p of sample.people) {
-      await db.savePerson(p);
-    }
-    for (const r of sample.relationships) {
-      await db.saveRelationship(r);
-    }
+    for (const p of sample.people) await db.savePerson(p);
+    for (const r of sample.relationships) await db.saveRelationship(r);
     await this.loadProject(sample.project.id);
-    this.toast('شجره‌نامه نمونه «خانواده آزادگان» بارگذاری شد — می‌توانید ویرایش کنید یا پروژه جدید بسازید', 'success');
+    this.toast('شجره‌نامه نمونه بارگذاری شد', 'success');
+  }
+
+  /** Create project + centered "Me" person */
+  async startWithMe() {
+    const project = {
+      id: Utils.uid(),
+      name: 'شجره‌نامه من',
+      description: '',
+      theme: 'forest',
+      createdAt: Utils.now(),
+      updatedAt: Utils.now()
+    };
+    await db.saveProject(project);
+    this.currentProject = project;
+
+    const me = {
+      id: Utils.uid(),
+      projectId: project.id,
+      firstName: 'من',
+      lastName: '',
+      gender: 'male',
+      birthDate: '',
+      deathDate: '',
+      confidence: 'certain',
+      isRoot: true
+    };
+    await db.savePerson(me);
+    this.people = [me];
+    this.relationships = [];
+
+    document.getElementById('project-title').textContent = project.name;
+    await this._loadProjects();
+    this._pushHistory();
+    this._refreshAll();
+    setTimeout(() => this.renderer.fit(), 100);
+    this.toast('روی «من» کلیک کن و پدر، مادر، همسر یا فرزند اضافه کن', 'success');
+  }
+
+  /** When user clicks a person on the tree */
+  onPersonSelected(person) {
+    this.profilePersonId = person.id;
+    this.renderer.select(person.id);
+    this.openInspector(person);
+    this.showAddRelationBar(person);
+  }
+
+  /** Floating bar: پدر / مادر / همسر / برادر / خواهر / پسر / دختر */
+  showAddRelationBar(person) {
+    let bar = document.getElementById('add-relation-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'add-relation-bar';
+      bar.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:var(--color-bg-elevated);border:1px solid var(--color-border);
+        border-radius:16px;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;
+        justify-content:center;box-shadow:var(--shadow-xl);z-index:80;
+        max-width:95vw;
+      `;
+      document.body.appendChild(bar);
+    }
+
+    const actions = [
+      { key: 'father', label: 'پدر', icon: '👨' },
+      { key: 'mother', label: 'مادر', icon: '👩' },
+      { key: 'spouse', label: 'همسر', icon: '💑' },
+      { key: 'brother', label: 'برادر', icon: '👦' },
+      { key: 'sister', label: 'خواهر', icon: '👧' },
+      { key: 'son', label: 'پسر', icon: '🧒' },
+      { key: 'daughter', label: 'دختر', icon: '👧' }
+    ];
+
+    bar.innerHTML = actions.map(a => `
+      <button data-rel="${a.key}" style="
+        display:flex;flex-direction:column;align-items:center;gap:4px;
+        padding:8px 12px;border-radius:12px;border:1px solid var(--color-border);
+        background:var(--color-bg-muted);cursor:pointer;font-family:inherit;
+        font-size:0.75rem;font-weight:500;min-width:64px;transition:all .15s
+      " onmouseover="this.style.background='var(--color-primary)';this.style.color='white';this.style.borderColor='var(--color-primary)'"
+        onmouseout="this.style.background='var(--color-bg-muted)';this.style.color='';this.style.borderColor='var(--color-border)'">
+        <span style="font-size:1.25rem">${a.icon}</span>
+        ${a.label}
+      </button>
+    `).join('') + `
+      <button id="btn-close-rel-bar" style="
+        padding:8px 12px;border-radius:12px;border:none;background:transparent;
+        cursor:pointer;font-size:1.1rem;color:var(--color-text-muted)
+      ">×</button>
+    `;
+
+    bar.querySelectorAll('[data-rel]').forEach(btn => {
+      btn.onclick = () => this.quickAddRelative(person, btn.dataset.rel);
+    });
+    document.getElementById('btn-close-rel-bar').onclick = () => bar.remove();
+  }
+
+  /** Quick-add a relative from the bar */
+  async quickAddRelative(basePerson, relKey) {
+    if (!this.currentProject) return;
+
+    const defaults = {
+      father:   { firstName: 'پدر', gender: 'male', type: 'father' },
+      mother:   { firstName: 'مادر', gender: 'female', type: 'mother' },
+      spouse:   { firstName: 'همسر', gender: basePerson.gender === 'male' ? 'female' : 'male', type: 'spouse' },
+      brother:  { firstName: 'برادر', gender: 'male', type: 'brother' },
+      sister:   { firstName: 'خواهر', gender: 'female', type: 'sister' },
+      son:      { firstName: 'پسر', gender: 'male', type: 'son' },
+      daughter: { firstName: 'دختر', gender: 'female', type: 'daughter' }
+    };
+
+    const def = defaults[relKey];
+    if (!def) return;
+
+    this._pushHistory();
+
+    const newPerson = {
+      id: Utils.uid(),
+      projectId: this.currentProject.id,
+      firstName: def.firstName,
+      lastName: basePerson.lastName || '',
+      gender: def.gender,
+      birthDate: '',
+      deathDate: '',
+      confidence: 'certain'
+    };
+    await db.savePerson(newPerson);
+    this.people.push(newPerson);
+
+    // Build relationship in correct direction
+    let fromId, toId, type;
+    if (relKey === 'father' || relKey === 'mother') {
+      fromId = newPerson.id;   // parent
+      toId = basePerson.id;    // child
+      type = relKey;
+    } else if (relKey === 'son' || relKey === 'daughter') {
+      fromId = basePerson.id;  // parent
+      toId = newPerson.id;     // child
+      type = relKey;
+    } else if (relKey === 'spouse') {
+      fromId = basePerson.id;
+      toId = newPerson.id;
+      type = 'spouse';
+    } else {
+      // brother / sister — link as sibling (same generation)
+      fromId = basePerson.id;
+      toId = newPerson.id;
+      type = relKey;
+    }
+
+    const rel = {
+      id: Utils.uid(),
+      projectId: this.currentProject.id,
+      type,
+      fromId,
+      toId
+    };
+    await db.saveRelationship(rel);
+    this.relationships.push(rel);
+
+    await db.saveProject(this.currentProject);
+    this._refreshAll();
+    setTimeout(() => this.renderer.fit(), 80);
+
+    // Open edit form so user can fill real name
+    this.openPersonForm(newPerson);
+    this.toast(`${def.firstName} اضافه شد — نام واقعی را وارد کن`, 'success');
   }
 
   async createProject() {
@@ -448,6 +639,9 @@ class ShajarehApp {
     this.renderer.setData(this.people, this.relationships);
     this._updateMeta();
     this._updateUndoButtons();
+    if (this.people.length === 0 && !this.currentProject) {
+      this.showWelcome();
+    }
   }
 
   _updateMeta() {

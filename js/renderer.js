@@ -187,13 +187,7 @@ class TreeRenderer {
     this.overlay.innerHTML = '';
 
     if (!this.layoutResult || this.layoutResult.nodes.length === 0) {
-      this.overlay.innerHTML = `
-        <div class="tree-empty">
-          <div class="empty-icon">🌳</div>
-          <h2>شجره‌نامه خالی است</h2>
-          <p>برای شروع یک فرد جدید اضافه کنید یا از منوی سمت راست پروژه بسازید.</p>
-        </div>
-      `;
+      // App handles welcome screen via showWelcome()
       return;
     }
 
