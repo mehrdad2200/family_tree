@@ -1,0 +1,71 @@
+/* ============================================================
+   Animations & Transitions
+   ============================================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s var(--ease-out);
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scale-in 0.25s var(--ease-out);
+}
+
+/* Card appear */
+.tree-card {
+  animation: scale-in 0.3s var(--ease-out) backwards;
+}
+
+.tree-card:nth-child(1) { animation-delay: 0.02s; }
+.tree-card:nth-child(2) { animation-delay: 0.04s; }
+.tree-card:nth-child(3) { animation-delay: 0.06s; }
+.tree-card:nth-child(4) { animation-delay: 0.08s; }
+.tree-card:nth-child(5) { animation-delay: 0.10s; }
+.tree-card:nth-child(6) { animation-delay: 0.12s; }
+.tree-card:nth-child(7) { animation-delay: 0.14s; }
+.tree-card:nth-child(8) { animation-delay: 0.16s; }
+.tree-card:nth-child(9) { animation-delay: 0.18s; }
+.tree-card:nth-child(10) { animation-delay: 0.20s; }
+
+/* Smooth hover lifts */
+.tree-card,
+.export-option,
+.list-row,
+.person-item,
+.project-item {
+  will-change: transform;
+}

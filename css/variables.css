@@ -1,0 +1,129 @@
+/* ============================================================
+   شجره‌نامه — Design Tokens & CSS Variables
+   ============================================================ */
+
+:root {
+  /* Brand Colors - Forest (default) */
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+  --color-primary-950: #052e16;
+
+  --color-primary: #2d6a4f;
+  --color-primary-light: #40916c;
+  --color-primary-dark: #1b4332;
+  --color-accent: #95d5b2;
+  --color-accent-soft: #d8f3dc;
+
+  /* Neutral */
+  --color-bg: #f8faf9;
+  --color-bg-elevated: #ffffff;
+  --color-bg-muted: #f1f5f4;
+  --color-bg-subtle: #e8f0ed;
+  --color-surface: #ffffff;
+  --color-border: #e2e8e5;
+  --color-border-strong: #cbd5d1;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Semantic */
+  --color-male: #3b82f6;
+  --color-male-soft: #dbeafe;
+  --color-female: #ec4899;
+  --color-female-soft: #fce7f3;
+  --color-spouse: #f472b6;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+  --color-info: #0ea5e9;
+
+  /* Typography */
+  --font-sans: 'Vazirmatn', 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Vazirmatn', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --shadow-focus: 0 0 0 3px rgba(45, 106, 79, 0.25);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
+
+  /* Layout */
+  --sidebar-width: 300px;
+  --sidebar-collapsed: 64px;
+  --toolbar-height: 60px;
+  --inspector-width: 340px;
+
+  /* Tree */
+  --card-width: 168px;
+  --card-height: 148px;
+  --card-gap-x: 48px;
+  --card-gap-y: 90px;
+  --line-color: #94a3b8;
+  --line-width: 2px;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 350ms;
+
+  /* Z-index */
+  --z-sidebar: 40;
+  --z-toolbar: 30;
+  --z-inspector: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+  --z-context: 150;
+  --z-loading: 999;
+}

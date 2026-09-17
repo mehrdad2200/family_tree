@@ -1,0 +1,50 @@
+/* ============================================================
+   Print Styles
+   ============================================================ */
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+  }
+
+  .sidebar,
+  .toolbar,
+  .inspector,
+  .tree-minimap,
+  .tree-legend,
+  .modal,
+  #toast-container,
+  .context-menu,
+  .loading-screen {
+    display: none !important;
+  }
+
+  .app {
+    display: block !important;
+    height: auto !important;
+  }
+
+  .main-area {
+    width: 100% !important;
+  }
+
+  .content-area,
+  .view,
+  .tree-wrapper {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .tree-overlay {
+    transform: none !important;
+  }
+
+  .tree-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}

@@ -1,0 +1,68 @@
+/* ============================================================
+   Themes
+   ============================================================ */
+
+/* Ocean */
+[data-theme="ocean"] {
+  --color-primary: #1e40af;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1e3a8a;
+  --color-accent: #93c5fd;
+  --color-accent-soft: #dbeafe;
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-900: #1e3a8a;
+}
+
+/* Earth / Traditional */
+[data-theme="earth"] {
+  --color-primary: #92400e;
+  --color-primary-light: #d97706;
+  --color-primary-dark: #78350f;
+  --color-accent: #fcd34d;
+  --color-accent-soft: #fef3c7;
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-900: #78350f;
+}
+
+/* Royal */
+[data-theme="royal"] {
+  --color-primary: #7c3aed;
+  --color-primary-light: #a78bfa;
+  --color-primary-dark: #5b21b6;
+  --color-accent: #c4b5fd;
+  --color-accent-soft: #ede9fe;
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-900: #5b21b6;
+}
+
+/* Dark */
+[data-theme="dark"] {
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
+  --color-primary-dark: #059669;
+  --color-accent: #6ee7b7;
+  --color-accent-soft: #064e3b;
+  --color-bg: #0f172a;
+  --color-bg-elevated: #1e293b;
+  --color-bg-muted: #334155;
+  --color-bg-subtle: #1e293b;
+  --color-surface: #1e293b;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-primary-50: #064e3b;
+  --color-primary-100: #065f46;
+  --color-primary-200: #047857;
+  --color-primary-900: #ecfdf5;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.35);
+}
