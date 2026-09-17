@@ -1,115 +1,335 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#111827">
-<title>شجره‌نامه | Family Tree</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شجره‌نامه | مدیریت شجره‌نامه خانوادگی</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand"><div class="brand-icon">🌳</div><div><b>شجره‌نامه</b><small>Family Tree</small></div></div>
-    <button class="nav active" data-view="tree">🌳 <span>درخت خانواده</span></button>
-    <button class="nav" data-view="people">👥 <span>افراد</span></button>
-    <button class="nav" data-view="timeline">🕰️ <span>خط زمانی</span></button>
-    <button class="nav" data-view="reports">📊 <span>گزارش و آمار</span></button>
-    <button class="nav" data-view="media">📷 <span>عکس و اسناد</span></button>
-    <button class="nav" data-view="settings">⚙️ <span>تنظیمات</span></button>
-    <div class="sidebar-bottom"><span id="saveState">ذخیره خودکار فعال</span></div>
-  </aside>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loader"></div>
+    <p>در حال بارگذاری شجره‌نامه...</p>
+  </div>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <h1 id="familyTitle">خانواده آزادگان</h1>
-        <p id="familySubtitle">مدیریت و نگهداری تاریخ خانواده</p>
+  <!-- App Container -->
+  <div id="app" class="app hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">🌳</span>
+          <span class="logo-text">شجره‌نامه</span>
+        </div>
+        <button class="btn-icon" id="btn-toggle-sidebar" title="بستن منو">☰</button>
       </div>
-      <div class="actions">
-        <input id="search" type="search" placeholder="جستجوی نام..." aria-label="جستجو">
-        <button class="btn ghost" id="cloudBtn">☁️ اتصال Cloud</button>
-        <button class="btn ghost" id="exportJson">پشتیبان JSON</button>
-        <button class="btn primary" id="addPerson">＋ افزودن فرد</button>
+
+      <div class="sidebar-section">
+        <div class="section-title">پروژه‌ها</div>
+        <div id="project-list" class="project-list"></div>
+        <button class="btn btn-primary btn-block" id="btn-new-project">
+          + پروژه جدید
+        </button>
       </div>
-    </header>
 
-    <section id="view-tree" class="view active">
-      <div class="toolbar">
-        <button class="btn ghost" id="zoomIn">＋</button>
-        <button class="btn ghost" id="zoomOut">−</button>
-        <button class="btn ghost" id="resetZoom">بازنشانی</button>
-        <button class="btn ghost" id="expandAll">نمایش همه</button>
-        <span class="spacer"></span>
-        <button class="btn ghost" id="exportHtml">خروجی HTML</button>
-        <button class="btn ghost" id="exportSvg">خروجی SVG</button>
-        <button class="btn primary" id="exportPrint">چاپ / PDF</button>
+      <div class="sidebar-section" id="people-section">
+        <div class="section-title">
+          افراد
+          <span id="people-count" class="badge">0</span>
+        </div>
+        <div class="search-box">
+          <input type="text" id="search-people" placeholder="جستجوی نام..." />
+        </div>
+        <div id="people-list" class="people-list"></div>
       </div>
-      <div class="tree-wrap" id="treeWrap">
-        <div id="treeCanvas" class="tree-canvas"></div>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-block" id="btn-export-menu">خروجی‌ها</button>
+        <button class="btn btn-ghost btn-block" id="btn-settings">⚙️ تنظیمات</button>
       </div>
-    </section>
+    </aside>
 
-    <section id="view-people" class="view">
-      <div class="section-head"><h2>افراد خانواده</h2><button class="btn primary" id="addPerson2">＋ افزودن فرد</button></div>
-      <div id="peopleGrid" class="people-grid"></div>
-    </section>
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-right">
+          <h1 id="current-project-name">پروژه‌ای انتخاب نشده</h1>
+          <span id="project-stats" class="project-stats"></span>
+        </div>
+        <div class="topbar-left">
+          <button class="btn btn-sm" id="btn-add-person" title="افزودن فرد">
+            + فرد جدید
+          </button>
+          <button class="btn btn-sm btn-outline" id="btn-zoom-fit">مناسب صفحه</button>
+          <div class="view-mode">
+            <button class="btn-icon active" data-mode="vertical" title="عمودی">↕️</button>
+            <button class="btn-icon" data-mode="horizontal" title="افقی">↔️</button>
+          </div>
+        </div>
+      </header>
 
-    <section id="view-timeline" class="view">
-      <div class="section-head"><h2>خط زمانی</h2></div>
-      <div id="timeline" class="timeline"></div>
-    </section>
-
-    <section id="view-reports" class="view">
-      <div class="section-head"><h2>گزارش و آمار</h2></div>
-      <div id="stats" class="stats"></div>
-    </section>
-
-    <section id="view-media" class="view">
-      <div class="section-head"><h2>عکس و اسناد</h2><button class="btn primary" id="addMedia">＋ افزودن فایل</button></div>
-      <div class="media-note">فایل‌ها فعلاً در مرورگر نگهداری می‌شوند. در نسخه Cloud می‌توان آن‌ها را روی فضای ابری ذخیره و با خانواده به اشتراک گذاشت.</div>
-      <div id="mediaGrid" class="media-grid"></div>
-    </section>
-
-    <section id="view-settings" class="view">
-      <div class="section-head"><h2>تنظیمات و Cloud</h2></div>
-      <div class="settings-card">
-        <label>نام خانواده<input id="familyName" type="text"></label>
-        <label>فونت
-          <select id="fontSelect"><option value="Vazirmatn, Tahoma, sans-serif">وزیر / Tahoma</option><option value="Tahoma, sans-serif">Tahoma</option><option value="Arial, sans-serif">Arial</option><option value="Georgia, serif">Georgia</option></select>
-        </label>
-        <label>رنگ اصلی<input id="accent" type="color" value="#4f46e5"></label>
-        <button class="btn primary" id="saveSettings">ذخیره تنظیمات</button>
-        <hr>
-        <h3>حساب و همگام‌سازی</h3>
-        <p id="cloudStatus">حالت محلی فعال است.</p>
-        <button class="btn primary" id="googleLogin">ورود با Google</button>
-        <button class="btn ghost" id="shareProject">ساخت لینک اشتراک</button>
-        <button class="btn ghost" id="exportGedcom">خروجی GEDCOM</button>
-        <button class="btn ghost" id="importJson">ورود پشتیبان JSON</button>
-        <input id="jsonFile" type="file" accept=".json" hidden>
+      <!-- Tree Canvas -->
+      <div class="tree-container" id="tree-container">
+        <div class="tree-canvas" id="tree-canvas">
+          <div id="tree-viewport" class="tree-viewport">
+            <!-- Tree will be rendered here -->
+          </div>
+        </div>
+        <div class="tree-controls">
+          <button class="btn-icon" id="btn-zoom-in">+</button>
+          <button class="btn-icon" id="btn-zoom-out">−</button>
+          <button class="btn-icon" id="btn-reset-view">↺</button>
+        </div>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🌳</div>
+          <h2>شجره‌نامه خالی است</h2>
+          <p>برای شروع، یک فرد جدید اضافه کنید یا پروژه جدیدی بسازید.</p>
+          <button class="btn btn-primary" id="btn-empty-add">افزودن اولین فرد</button>
+        </div>
       </div>
-    </section>
-  </main>
-</div>
+    </main>
+  </div>
 
-<div id="modal" class="modal hidden">
- <div class="modal-card">
-  <div class="modal-head"><h3 id="modalTitle">افزودن فرد</h3><button id="closeModal">×</button></div>
-  <form id="personForm">
-   <input type="hidden" id="personId">
-   <label>نام و نام خانوادگی *<input id="personName" required></label>
-   <div class="two"><label>جنسیت<select id="gender"><option value="male">مرد</option><option value="female">زن</option></select></label><label>سال تولد<input id="birth" placeholder="مثلاً ۱۳۲۰"></label></div>
-   <div class="two"><label>سال فوت<input id="death" placeholder="در صورت وجود"></label><label>محل تولد<input id="birthPlace"></label></div>
-   <label>پدر<select id="father"><option value="">— بدون انتخاب —</option></select></label>
-   <label>مادر<select id="mother"><option value="">— بدون انتخاب —</option></select></label>
-   <label>همسر<select id="spouse"><option value="">— بدون انتخاب —</option></select></label>
-   <label>توضیحات<textarea id="notes" rows="4"></textarea></label>
-   <div class="form-actions"><button type="button" class="btn danger" id="deletePerson">حذف</button><span class="spacer"></span><button type="button" class="btn ghost" id="cancel">انصراف</button><button class="btn primary">ذخیره</button></div>
-  </form>
- </div>
-</div>
-<script src="app.js"></script>
-<input id="mediaFile" type="file" accept="image/*,.pdf,.txt,.doc,.docx" hidden>
+  <!-- Modal: New Project -->
+  <div class="modal" id="modal-new-project">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>پروژه جدید</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>نام پروژه (مثلاً خانواده آزادگان)</label>
+          <input type="text" id="input-project-name" placeholder="نام خانواده یا خاندان" />
+        </div>
+        <div class="form-group">
+          <label>توضیحات (اختیاری)</label>
+          <textarea id="input-project-desc" rows="3" placeholder="توضیح کوتاه درباره این شجره‌نامه"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">انصراف</button>
+        <button class="btn btn-primary" id="btn-create-project">ایجاد پروژه</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Person Form -->
+  <div class="modal" id="modal-person">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 id="person-modal-title">افزودن فرد جدید</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>نام *</label>
+            <input type="text" id="person-first-name" required />
+          </div>
+          <div class="form-group">
+            <label>نام خانوادگی</label>
+            <input type="text" id="person-last-name" />
+          </div>
+          <div class="form-group">
+            <label>نام مستعار</label>
+            <input type="text" id="person-nickname" />
+          </div>
+          <div class="form-group">
+            <label>جنسیت</label>
+            <select id="person-gender">
+              <option value="male">مرد</option>
+              <option value="female">زن</option>
+              <option value="unknown">نامشخص</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تاریخ تولد</label>
+            <input type="text" id="person-birth-date" placeholder="مثلاً ۱۳۲۰ یا 1941" />
+          </div>
+          <div class="form-group">
+            <label>محل تولد</label>
+            <input type="text" id="person-birth-place" />
+          </div>
+          <div class="form-group">
+            <label>تاریخ فوت</label>
+            <input type="text" id="person-death-date" placeholder="خالی = زنده" />
+          </div>
+          <div class="form-group">
+            <label>محل فوت / دفن</label>
+            <input type="text" id="person-death-place" />
+          </div>
+          <div class="form-group full-width">
+            <label>شغل</label>
+            <input type="text" id="person-occupation" />
+          </div>
+          <div class="form-group full-width">
+            <label>توضیحات / زندگینامه</label>
+            <textarea id="person-bio" rows="4"></textarea>
+          </div>
+          <div class="form-group">
+            <label>درجه اطمینان</label>
+            <select id="person-confidence">
+              <option value="certain">قطعی 🟢</option>
+              <option value="probable">احتمالی 🟡</option>
+              <option value="uncertain">نامشخص 🔴</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">انصراف</button>
+        <button class="btn btn-danger hidden" id="btn-delete-person">حذف فرد</button>
+        <button class="btn btn-primary" id="btn-save-person">ذخیره</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Relationship -->
+  <div class="modal" id="modal-relationship">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>افزودن رابطه</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>نوع رابطه</label>
+          <select id="rel-type">
+            <option value="parent">پدر / مادر</option>
+            <option value="child">فرزند</option>
+            <option value="spouse">همسر</option>
+            <option value="sibling">خواهر / برادر</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>انتخاب فرد</label>
+          <select id="rel-person"></select>
+        </div>
+        <div class="form-group" id="rel-parent-type-group">
+          <label>نوع والد</label>
+          <select id="rel-parent-type">
+            <option value="father">پدر</option>
+            <option value="mother">مادر</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">انصراف</button>
+        <button class="btn btn-primary" id="btn-save-relationship">افزودن رابطه</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Person Detail / Profile -->
+  <div class="modal" id="modal-profile">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 id="profile-name">پروفایل</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body" id="profile-content">
+        <!-- Dynamic content -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btn-edit-person">ویرایش</button>
+        <button class="btn btn-primary" id="btn-add-rel">افزودن رابطه</button>
+        <button class="btn btn-ghost modal-close">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Export -->
+  <div class="modal" id="modal-export">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>خروجی گرفتن</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-options">
+          <button class="export-card" data-type="pdf">
+            <span class="export-icon">📄</span>
+            <span class="export-title">PDF</span>
+            <span class="export-desc">شجره‌نامه قابل چاپ</span>
+          </button>
+          <button class="export-card" data-type="png">
+            <span class="export-icon">🖼️</span>
+            <span class="export-title">PNG</span>
+            <span class="export-desc">تصویر با کیفیت بالا</span>
+          </button>
+          <button class="export-card" data-type="html">
+            <span class="export-icon">🌐</span>
+            <span class="export-title">HTML</span>
+            <span class="export-desc">سایت کامل مستقل</span>
+          </button>
+          <button class="export-card" data-type="json">
+            <span class="export-icon">📦</span>
+            <span class="export-title">JSON</span>
+            <span class="export-desc">پشتیبان‌گیری داده</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings -->
+  <div class="modal" id="modal-settings">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>تنظیمات</h3>
+        <button class="btn-icon modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>فونت</label>
+          <select id="setting-font">
+            <option value="Vazirmatn">وزیرمتن (پیشنهادی)</option>
+            <option value="Tahoma">تahoma</option>
+            <option value="Arial">Arial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>تم رنگی</label>
+          <select id="setting-theme">
+            <option value="green">سبز (پیش‌فرض)</option>
+            <option value="blue">آبی</option>
+            <option value="brown">قهوه‌ای سنتی</option>
+            <option value="dark">تیره</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>اندازه کارت افراد</label>
+          <select id="setting-card-size">
+            <option value="small">کوچک</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="large">بزرگ</option>
+          </select>
+        </div>
+        <hr />
+        <div class="form-group">
+          <button class="btn btn-outline btn-block" id="btn-export-json">دانلود پشتیبان (JSON)</button>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-danger btn-block" id="btn-clear-data">پاک کردن تمام داده‌ها</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/tree.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
